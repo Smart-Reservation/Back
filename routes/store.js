@@ -3,19 +3,9 @@ var router = express.Router();
 var db=require('../database');
 
 
-
-let data= [{
-  store_id : 1,
-  imgUrl : "/img/1"
-},
-{
-  store_id : 2,
-  imgUrl : "/img/2"
-},
-];
 /* GET users listing. */
 router.get('/list', function(req, res, next) {
-  db.query('SELECT id, imgUrl from Store',(err,results)=>{
+  db.query('SELECT id, store_name, location,deposit, imgUrl from Store',(err,results)=>{
     if(err) throw err;
     console.log('StoreList : ',results);
     res.send(results);
