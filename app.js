@@ -7,7 +7,7 @@ const cors = require('cors');
 
 var indexRouter = require('./routes/index');
 var storeRouter = require('./routes/store');
-
+var reservationRouter= require('./routes/reservation');
 var app = express();
 
 // view engine setup
@@ -23,6 +23,7 @@ app.use(cors());
 
 app.use('/', indexRouter);
 app.use('/store', storeRouter);
+app.use('/reservation',reservationRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -37,7 +38,7 @@ app.use(function(err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  res.render('error');  
 });
 
 module.exports = app;
