@@ -3,18 +3,19 @@ var router = express.Router();
 var db = require('../database');
 
 
-/* GET users listing. */
+//가게 리스트
 router.get('/list', function (req, res, next) {
-  db.query('SELECT id, store_name, location,deposit, imgUrl from Store', (err, results) => {
+  db.query('SELECT Store.id, store_name as storeName, c.name as category,location,deposit, imgUrl FROM Store JOIN Category as c on c.id=Store.category_id', (err, results) => {
     if (err) throw err;
     console.log('StoreList : ', results);
     res.send(results);
   });
 });
 
+//가게 정보
 router.get('/:id', function (req, res) {
   db.query(
-    'SELECT s.id, s.store_name, s.information, s.location,c.name,s.deposit from Store as s join Category as c on s.category_id=c.id where s.id=?', [req.params.id], (err, result) => {
+    'SELECT id, store_name as storeName, Category.name as category,location,deposit, imgUrl FROM Store JOIN Category as c on c.id=Store.category_id where id=?', [req.params.id], (err, result) => {
       if (err) throw err;
       console.log('Store ', req.params.id, " :", result);
       res.send(result[0]);
