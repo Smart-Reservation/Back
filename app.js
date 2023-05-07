@@ -5,6 +5,9 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const cors = require('cors');
 
+const cron = require('node-cron');
+
+var db = require('./database');
 var indexRouter = require('./routes/index');
 var storeRouter = require('./routes/store');
 var reservationRouter= require('./routes/reservation');
@@ -39,6 +42,29 @@ app.use(function(err, req, res, next) {
   // render the error page
   res.status(err.status || 500);
   res.render('error');  
+});
+
+//예약 부도
+cron.schedule('*/10 * * * *', function noShow() {
+  console.log("Scheduling");
+  db.query('SELECT * FROM Reservation WHERE  TIMESTAMPDIFF(MINUTE,time,NOW())>=20', (err, result) => {
+    if (err) {
+      throw err;
+    }
+    console.log(result);
+    
+    if (result.length !== 0) {
+      /**
+       * @todo chain에 예약 부도 
+      */
+      db.query('DELETE FROM Reservation WHERE  TIMESTAMPDIFF(MINUTE,time,NOW())>=20', (err, res) => {
+        if (err) {
+          throw err;
+        }
+        console.log('DELETE Reservation By NoShow');
+      });
+    }
+  });
 });
 
 module.exports = app;
