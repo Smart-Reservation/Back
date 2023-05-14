@@ -7,7 +7,6 @@ var db = require('../database');
 router.get('/list', function (req, res, next) {
   db.query('SELECT Store.id, store_name as storeName, c.name as category,location,deposit, imgUrl FROM Store JOIN Category as c on c.id=Store.category_id', (err, results) => {
     if (err) throw err;
-    console.log('StoreList : ', results);
     res.send(results);
   });
 });

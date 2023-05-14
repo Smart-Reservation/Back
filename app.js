@@ -55,7 +55,7 @@ cron.schedule('*/10 * * * *', function noShow() {
     
     if (result.length !== 0) {
       /**
-       * @todo chain에 예약 부도 
+       * @todo chain에 예약 부도
       */
       db.query('DELETE FROM Reservation WHERE  TIMESTAMPDIFF(MINUTE,time,NOW())>=20', (err, res) => {
         if (err) {
@@ -63,7 +63,7 @@ cron.schedule('*/10 * * * *', function noShow() {
         }
         console.log('DELETE Reservation By NoShow');
       });
-    }
+    } 
   });
 });
 
