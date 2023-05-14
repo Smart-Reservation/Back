@@ -22,7 +22,7 @@ router.get('/list/:storeId', function (req, res) {
                 if (reservationList.length > 0 && reserveDate) {
                     reserveDate.reservedList = reserveDate.reservedList.concat({
                         index: periodList.indexOf(date.getHours()),
-                        number: reservationTime.number,
+                        numbers: reservationTime.number,
                         address: reservationTime.address
                     })
                 } else {
@@ -34,7 +34,7 @@ router.get('/list/:storeId', function (req, res) {
                             reservedList: [
                                 {
                                     index: periodList.indexOf(date.getHours()),
-                                    number: reservationTime.number,
+                                    numbers: reservationTime.number,
                                     address: reservationTime.address
                                 }
                             ]
@@ -96,17 +96,6 @@ router.get('/list/personal/:address', function (req, res) {
     )
 })
 
-//가게의 예약 불가능한 시간 리스트
-router.post('/unavailable/list', function (req, res) {
-    //예약 불가능 리스트에 이미 있는지 확인
-    db.query(
-        'SELECT time FROM UnavailableTime where store_id=? and DATE(time)=?', [req.body.id, req.body.date], (err, result) => {
-            if (err) throw err;
-            res.send(result);
-        }
-    )
-})
-
 //예약 불가능 리스트 추가
 router.post('/unavailable/add', function (req, res) {
     //예약 불가능 리스트에 이미 있는지 확인
@@ -137,8 +126,15 @@ router.post('/reservate', function (req, res) {
                     'INSERT INTO Reservation(store_id, address, time,number) VALUE(?,?,?,?)', [req.body.data.storeId, req.body.data.address, req.body.data.time, req.body.data.number], (err) => {
                         if (err) throw err;
                         console.log('insert: ', req.body.data.storeId, req.body.data.address, req.body.data.time, req.body.data.number);
-                        // 체인에 송금 요청 req.body.data.address
-                        res.send("Success");
+                        db.query(
+                            'SELECT * FROM Reservation JOIN Store on Reservation.store_id=Store.id WHERE Store.id=? and time=?', [req.body.data.storeId, req.body.data.time], (err, data) => {
+                                res.send({
+                                    id: data[0].id,
+                                    ownerAddress: data[0].owner,
+                                    deposit: data[0].deposit * data[0].number
+                                });
+                            }
+                        )
                     })
             }
             else {
@@ -170,16 +166,6 @@ router.post('/cancel', function (req, res) {
     })
 })
 
-router.post('/exist', function (req, res) {
-    db.query('SELECT * FROM Reservation where store_id=? and address=? and time=? ', [req.body.storeId, req.body.address, req.body.time], (err, result) => {
-        if (err) throw err;
-        if (!(result === undefined || result.length === 0)) {
-            res.send(result.id);
-        }else{
-            res.status(400).send("Failed");
-        }
-    })
-})
 
 //예약 정상 처리
 router.post('/showUp', function (req, res) {
@@ -195,7 +181,7 @@ router.post('/showUp', function (req, res) {
             db.query(
                 'DELETE FROM Reservation where store_id=? and address=? and time=?', [req.body.storeId, req.body.address, req.body.time], (err) => {
                     if (err) throw err;
-                    console.log('delete: ', req.body.storeId, req.body.address, req.body.time, );
+                    console.log('delete: ', req.body.storeId, req.body.address, req.body.time,);
 
                     /**
                      * @todo chain에 정상처리 송금요청
